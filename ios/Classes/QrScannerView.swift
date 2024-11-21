@@ -207,6 +207,13 @@ struct QRScannerView: UIViewControllerRepresentable {
                 if #available(iOS 15.4, *), cameraDevice.isFocusModeSupported(.autoFocus) {
                     cameraDevice.automaticallyAdjustsFaceDrivenAutoFocusEnabled = false
                 }
+
+                // Optional: Set a lower frame rate to reduce processing overhead
+                if cameraDevice.activeVideoMinFrameDuration.timescale > 30 {
+                    cameraDevice.activeVideoMinFrameDuration = CMTime(value: 1, timescale: 30)
+                    cameraDevice.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: 30)
+                }
+
                 cameraDevice.unlockForConfiguration()
             } catch {
                 print("Couldnot setup autofocus")
@@ -235,8 +242,8 @@ struct QRScannerView: UIViewControllerRepresentable {
         captureSession.addOutput(metadataOutput)
         metadataOutput.setMetadataObjectsDelegate(
             context.coordinator, queue: DispatchQueue.global(qos: .userInitiated))
-        metadataOutput.metadataObjectTypes = [.ean8, .ean13, .pdf417, .qr]
-
+        metadataOutput.metadataObjectTypes = [.qr]
+        metadataOutput.rectOfInterest = CGRect(x: 0, y: 0, width: 0.8, height: 0.8)
         // Define scanning area
         // let scanningArea = CGRect(
         //     x: (UIScreen.main.bounds.width - 300) / 2,

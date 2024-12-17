@@ -1,7 +1,6 @@
 name: barcode_scanner
 description: 'A new Flutter plugin project.'
 version: 0.0.1
-homepage:
 
 environment:
   sdk: ^3.5.3
@@ -36,6 +35,7 @@ flutter:
   plugin:
     platforms:
       android:
+        package: com.example.barcode_scanner
         pluginClass: BarcodeScannerPlugin
       ios:
         pluginClass: BarcodeScannerPlugin

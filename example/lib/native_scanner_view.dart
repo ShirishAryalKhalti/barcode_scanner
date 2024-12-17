@@ -33,7 +33,12 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
     final Map<String, dynamic> creationParams = <String, dynamic>{'resolution': '1080p', 'camera_position': 'back'};
 
     return switch (defaultTargetPlatform) {
-      TargetPlatform.android => const Text('IOS ma run garum hai'),
+      TargetPlatform.android => AndroidView(
+          viewType: viewType,
+          layoutDirection: TextDirection.ltr,
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+        ),
       TargetPlatform.iOS => UiKitView(
           viewType: viewType,
           layoutDirection: TextDirection.ltr,

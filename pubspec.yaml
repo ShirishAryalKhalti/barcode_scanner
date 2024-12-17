@@ -37,6 +37,9 @@ flutter:
     platforms:
       ios:
         pluginClass: BarcodeScannerPlugin
+      android:
+        package: com.example.barcode_scanner
+        pluginClass: BarcodeScannerPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

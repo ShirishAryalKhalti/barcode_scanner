@@ -2,7 +2,7 @@ group = "com.example.barcode_scanner"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "1.8.22"
+    ext.kotlin_version = "1.9.10"
     repositories {
         google()
         mavenCentral()
@@ -32,12 +32,12 @@ android {
     compileSdk = 34
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11
     }
 
     sourceSets {
@@ -49,20 +49,32 @@ android {
         minSdk = 21
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.5.3" // Use the same version as your Compose library
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
+
+
+        // camera
+        implementation("androidx.camera:camera-core:1.4.1")
+        implementation("androidx.camera:camera-view:1.4.1")
+
+        // zxing
+        implementation ("io.github.zxing-cpp:android:2.2.0")
+
+        implementation "androidx.activity:activity-compose:1.9.3" // Replace with the latest version
+
+        // Add Compose UI dependencies if not already added
+        implementation "androidx.compose.ui:ui:1.7.6" // Compose UI toolkit
+        implementation "androidx.compose.material:material:1.7.6" // Material Design components
+        implementation "androidx.compose.ui:ui-tooling-preview:1.7.6" // Preview support
     }
 
-    testOptions {
-        unitTests.all {
-            useJUnitPlatform()
-
-            testLogging {
-               events "passed", "skipped", "failed", "standardOut", "standardError"
-               outputs.upToDateWhen {false}
-               showStandardStreams = true
-            }
-        }
-    }
 }

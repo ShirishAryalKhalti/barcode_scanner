@@ -39,36 +39,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          NativeScannerView(
-            onScanSuccess: (codes) async {
-              _controller.stopScanner();
-              await _showQRDialog(context, codes);
-              _controller.startScanner();
-            },
-            onError: (error) {},
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              children: [
-                ElevatedButton(
-                  onPressed: _controller.startScanner,
-                  child: const Text('Start'),
-                ),
-                ElevatedButton(
-                  onPressed: _controller.stopScanner,
-                  child: const Text('Stop'),
-                ),
-                ElevatedButton(
-                  onPressed: _controller.toggleTorch,
-                  child: const Text('Torch'),
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: Center(
+        child: NativeScannerView(
+          onScanSuccess: (codes) async {
+            print('The onScanSuccess i get is');
+            _controller.stopScanner();
+            await _showQRDialog(context, codes);
+            _controller.startScanner();
+          },
+          onError: (error) {
+            print('The error i get is  $error');
+          },
+        ),
       ),
     );
   }

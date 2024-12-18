@@ -73,10 +73,10 @@ class CameraView(context: Context, private val lifecycleOwner: LifecycleOwner) :
                         )
                     }
 
-//                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                val cameraSelector = CameraSelector.Builder()
-                    .requireLensFacing(CameraSelector.LENS_FACING_BACK) // Use front camera for devices without rear camera
-                    .build()
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+//                val cameraSelector = CameraSelector.Builder()
+//                    .requireLensFacing(CameraSelector.LENS_FACING_BACK) // Use front camera for devices without rear camera
+//                    .build()
 
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
@@ -103,8 +103,6 @@ class CameraView(context: Context, private val lifecycleOwner: LifecycleOwner) :
         // Clean up any resources if needed (e.g., shutting down the camera executor)
     }
 }
-
-
 
 //class CameraView(context: Context, private val lifecycleOwner: LifecycleOwner) : View(context) {
 //

@@ -30,7 +30,7 @@ class BarcodeAnalyzer(private val barcodeListener: BarcodeListener) : ImageAnaly
                 zxingScanner.read(it)
             }.let { results ->
                 val result = results.first()
-//                barcodeListener("${result.text}")
+                barcodeListener("${result.text}")
             }
         } catch (e: Throwable) {
             e.message ?: "Error"

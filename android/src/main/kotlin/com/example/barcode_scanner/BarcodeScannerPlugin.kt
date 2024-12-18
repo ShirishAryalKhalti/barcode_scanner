@@ -1,24 +1,78 @@
 package com.example.barcode_scanner
 
-import androidx.annotation.NonNull
+import android.app.Activity
+import androidx.lifecycle.LifecycleOwner
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
+class BarcodeScannerPlugin : FlutterPlugin, ActivityAware {
+    private var activity: Activity? = null
 
-
-/** BarcodeScannerPlugin */
-class BarcodeScannerPlugin: FlutterPlugin {
-
-  override fun onAttachedToEngine(binding: FlutterPluginBinding) {
-    binding
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        binding
             .platformViewRegistry
-            .registerViewFactory("<platform-view-type>", NativeViewFactory())
+            .registerViewFactory("<platform-view-type>", NativeViewFactory(::getLifecycleOwner))
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {}
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activity = binding.activity
+    }
+
+    override fun onDetachedFromActivity() {
+        activity = null
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        activity = null
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        activity = binding.activity
+    }
+
+    private fun getLifecycleOwner(): LifecycleOwner {
+        val currentActivity = activity
+        return if (currentActivity is LifecycleOwner) {
+            currentActivity
+        } else {
+            throw IllegalStateException("Activity does not implement LifecycleOwner")
+        }
+    }
 }
 
-override fun onDetachedFromEngine(binding: FlutterPluginBinding) {}
-}
+
+
+///** BarcodeScannerPlugin */
+//class BarcodeScannerPlugin: FlutterPlugin, ActivityAware {
+//
+//    override fun onAttachedToEngine(binding: FlutterPluginBinding) {
+//        binding
+//            .platformViewRegistry
+//            .registerViewFactory("<platform-view-type>", NativeViewFactory())
+//    }
+//
+//    override fun onDetachedFromEngine(binding: FlutterPluginBinding) {}
+//
+//    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+//        val activity = binding.activity
+//        val cameraView = CameraActivity(activity.applicationContext, activity) // Pass activity as LifecycleOwner
+//        // ... register the cameraView with the platform view registry ...
+//    }
+//
+//    override fun onDetachedFromActivityForConfigChanges() {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun onDetachedFromActivity() {
+//        TODO("Not yet implemented")
+//    }
+//}
+

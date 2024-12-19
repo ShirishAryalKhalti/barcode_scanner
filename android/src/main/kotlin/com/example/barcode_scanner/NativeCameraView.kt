@@ -9,7 +9,7 @@ import android.util.Log
 import android.util.Size
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.LinearLayout
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -50,6 +50,7 @@ class NativeCameraView(
 
     private var analysisUseCase: ImageAnalysis = ImageAnalysis.Builder()
         .setResolutionSelector(selectorBuilder.build())
+        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
         .build()
 
     companion object {
@@ -75,7 +76,7 @@ class NativeCameraView(
         setUpCamera()
 
         preview.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
+            OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 preview.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 preview.requestLayout()
@@ -98,6 +99,7 @@ class NativeCameraView(
             tryInvert = true
             tryHarder = true
             tryDownscale = true
+
         }
         barcodeReader = BarcodeReader(options)
         analysisUseCase.setAnalyzer(
@@ -120,15 +122,12 @@ class NativeCameraView(
         barcodeScanner: BarcodeReader,
         imageProxy: ImageProxy
     ) {
-
       imageProxy.let { image ->
-            val buffer = image.planes[0].buffer
-            val data = ByteArray(buffer.remaining())
-            buffer.get(data)
-
-            val result = barcodeScanner.read(image)
-            if (result.isNotEmpty()) {
-                Log.d("BarcodeScanner", "Barcode: $result")
+            val codes = barcodeScanner.read(image)
+            if (codes.isNotEmpty()) {
+                for (code in codes) {
+                    Log.d("QR_RESULT", "Barcode: ${code.text}")
+                }
             }
           image.close()
         }
@@ -149,11 +148,10 @@ class NativeCameraView(
 
             // Preview
             val surfacePreview = Preview.Builder()
-//                .setTargetResolution(Size(1280, 720)) // HD resolution
+                .setResolutionSelector(selectorBuilder.build())
                 .build()
                 .also {
-                    it.setSurfaceProvider(preview.surfaceProvider)
-
+                    it.surfaceProvider = preview.surfaceProvider
                 }
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA

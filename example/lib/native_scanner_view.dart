@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:barcode_scanner/barcode_scanner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -50,16 +48,10 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
   }
 
   @override
-  void onScanSuccess(List<String> codes) {
-    log('This message is from flutter side.... QR: $codes');
-    widget.onScanSuccess(codes);
-  }
+  void onScanSuccess(List<String> codes) => widget.onScanSuccess(codes);
 
   @override
-  void onScanError(ScannerError error) {
-    log('Scanner Error', error: error);
-    widget.onError(error);
-  }
+  void onScanError(ScannerError error) => widget.onError(error);
 }
 
 // if the selected quality is not available then [hd1280x720] will be used as default

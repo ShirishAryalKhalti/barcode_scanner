@@ -71,25 +71,6 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
-struct Message {
-  var message: String? = nil
-
-  // swift-format-ignore: AlwaysUseLowerCamelCase
-  static func fromList(_ pigeonVar_list: [Any?]) -> Message? {
-    let message: String? = nilOrValue(pigeonVar_list[0])
-
-    return Message(
-      message: message
-    )
-  }
-  func toList() -> [Any?] {
-    return [
-      message
-    ]
-  }
-}
-
-/// Generated class from Pigeon that represents data sent in messages.
 struct ScannerError {
   var message: String? = nil
   var tag: String? = nil
@@ -116,8 +97,6 @@ private class ScannerPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
     case 129:
-      return Message.fromList(self.readValue() as! [Any?])
-    case 130:
       return ScannerError.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -127,11 +106,8 @@ private class ScannerPigeonCodecReader: FlutterStandardReader {
 
 private class ScannerPigeonCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? Message {
+    if let value = value as? ScannerError {
       super.writeByte(129)
-      super.writeValue(value.toList())
-    } else if let value = value as? ScannerError {
-      super.writeByte(130)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -153,41 +129,6 @@ class ScannerPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = ScannerPigeonCodec(readerWriter: ScannerPigeonCodecReaderWriter())
 }
 
-/// Flutter calls Native API
-/// A concrete class needs to be implemented on the Swift side
-///
-/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
-protocol IsSwift {
-  func hostApi(completion: @escaping (Result<Message, Error>) -> Void)
-}
-
-/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
-class IsSwiftSetup {
-  static var codec: FlutterStandardMessageCodec { ScannerPigeonCodec.shared }
-  /// Sets up an instance of `IsSwift` to handle messages through the `binaryMessenger`.
-  static func setUp(
-    binaryMessenger: FlutterBinaryMessenger, api: IsSwift?, messageChannelSuffix: String = ""
-  ) {
-    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-    let hostApiChannel = FlutterBasicMessageChannel(
-      name: "dev.flutter.pigeon.barcode_scanner.IsSwift.hostApi\(channelSuffix)",
-      binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      hostApiChannel.setMessageHandler { _, reply in
-        api.hostApi { result in
-          switch result {
-          case .success(let res):
-            reply(wrapResult(res))
-          case .failure(let error):
-            reply(wrapError(error))
-          }
-        }
-      }
-    } else {
-      hostApiChannel.setMessageHandler(nil)
-    }
-  }
-}
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol ScannerFlutterApiProtocol {
   func onScanSuccess(
@@ -255,6 +196,7 @@ protocol ScannerController {
   func toggleTorch() throws -> Bool
   func startScanner() throws
   func stopScanner() throws
+  func disposeScanner() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -310,6 +252,21 @@ class ScannerControllerSetup {
       }
     } else {
       stopScannerChannel.setMessageHandler(nil)
+    }
+    let disposeScannerChannel = FlutterBasicMessageChannel(
+      name: "dev.flutter.pigeon.barcode_scanner.ScannerController.disposeScanner\(channelSuffix)",
+      binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      disposeScannerChannel.setMessageHandler { _, reply in
+        do {
+          try api.disposeScanner()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      disposeScannerChannel.setMessageHandler(nil)
     }
   }
 }

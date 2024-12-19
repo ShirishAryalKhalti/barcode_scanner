@@ -51,6 +51,7 @@ class ScannerError {
   }
 }
 
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -58,7 +59,7 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is ScannerError) {
+    }    else if (value is ScannerError) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
     } else {
@@ -69,7 +70,7 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129:
+      case 129: 
         return ScannerError.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -84,11 +85,7 @@ abstract class ScannerFlutterApi {
 
   void onScanError(ScannerError error);
 
-  static void setUp(
-    ScannerFlutterApi? api, {
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) {
+  static void setUp(ScannerFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
       final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -98,7 +95,8 @@ abstract class ScannerFlutterApi {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null, 'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess was null.');
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess was null.');
           final List<Object?> args = (message as List<Object?>?)!;
           final List<String>? arg_codes = (args[0] as List<Object?>?)?.cast<String>();
           assert(arg_codes != null,
@@ -108,7 +106,7 @@ abstract class ScannerFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
+          }          catch (e) {
             return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
@@ -122,7 +120,8 @@ abstract class ScannerFlutterApi {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null, 'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanError was null.');
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanError was null.');
           final List<Object?> args = (message as List<Object?>?)!;
           final ScannerError? arg_error = (args[0] as ScannerError?);
           assert(arg_error != null,
@@ -132,7 +131,7 @@ abstract class ScannerFlutterApi {
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          } catch (e) {
+          }          catch (e) {
             return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
           }
         });
@@ -161,7 +160,8 @@ class ScannerController {
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final List<Object?>? pigeonVar_replyList = await pigeonVar_channel.send(null) as List<Object?>?;
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -187,7 +187,8 @@ class ScannerController {
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final List<Object?>? pigeonVar_replyList = await pigeonVar_channel.send(null) as List<Object?>?;
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -208,7 +209,30 @@ class ScannerController {
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final List<Object?>? pigeonVar_replyList = await pigeonVar_channel.send(null) as List<Object?>?;
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> disposeScanner() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.barcode_scanner.ScannerController.disposeScanner$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {

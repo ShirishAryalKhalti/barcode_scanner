@@ -27,11 +27,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final ScannerController _controller;
-
+  bool isDialogVisible = false;
   @override
   initState() {
     _controller = ScannerController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.disposeScanner();
+    super.dispose();
   }
 
   @override
@@ -43,9 +49,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           NativeScannerView(
             onScanSuccess: (codes) async {
-              _controller.stopScanner();
+              await _controller.stopScanner();
+              if (isDialogVisible) return;
+              isDialogVisible = true;
               await _showQRDialog(context, codes);
-              _controller.startScanner();
+              isDialogVisible = false;
+              await _controller.startScanner();
             },
             onError: (error) {},
           ),

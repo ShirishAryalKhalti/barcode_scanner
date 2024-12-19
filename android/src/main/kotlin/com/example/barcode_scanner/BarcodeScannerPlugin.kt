@@ -1,24 +1,40 @@
 package com.example.barcode_scanner
 
-import androidx.annotation.NonNull
+import android.app.Activity
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 
 
 /** BarcodeScannerPlugin */
-class BarcodeScannerPlugin: FlutterPlugin {
+class BarcodeScannerPlugin: FlutterPlugin, ActivityAware {
+    private var activity: Activity? = null
+    private var pluginBinding: FlutterPluginBinding? = null
 
-  override fun onAttachedToEngine(binding: FlutterPluginBinding) {
-    binding
+    override fun onAttachedToEngine(binding: FlutterPluginBinding) {
+        pluginBinding = binding
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPluginBinding) {}
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        pluginBinding!!
             .platformViewRegistry
-            .registerViewFactory("<platform-view-type>", NativeViewFactory())
-}
+            .registerViewFactory("<platform-view-type>", NativeViewFactory(binding.activity))
+    }
 
-override fun onDetachedFromEngine(binding: FlutterPluginBinding) {}
+    override fun onDetachedFromActivityForConfigChanges() {
+        activity = null
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        activity = binding.activity
+    }
+
+    override fun onDetachedFromActivity() {
+        activity = null
+    }
 }

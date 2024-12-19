@@ -1,5 +1,7 @@
 package com.example.barcode_scanner
 
+import ScannerController
+import ScannerFlutterApi
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -22,6 +24,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.platform.PlatformView
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -29,18 +32,23 @@ import zxingcpp.BarcodeReader
 
 class NativeCameraView(
     private val context: Context, id: Int, creationParams: Map<String?, Any?>?,
-    private val activity: Activity
-) : PlatformView {
+    private val activity: Activity,
+    private val binaryMessenger: BinaryMessenger,
+) : PlatformView, ScannerController{
 
     private var mCameraProvider: ProcessCameraProvider? = null
     private var linearLayout: LinearLayout = LinearLayout(context)
     private var preview: PreviewView = PreviewView(context)
-
+    private var  scannerFlutterApi = ScannerFlutterApi(binaryMessenger)
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var options: BarcodeReader.Options
     private  lateinit var  barcodeReader: BarcodeReader
+    private var camera: androidx.camera.core.Camera? = null
+    private var isTorchOn = false
 
-    private val cameraResolution = Size(1920, 1080)
+
+//    private val cameraResolution = Size(1920, 1080)
+    private val cameraResolution = Size(1280, 720)
     private val selectorBuilder = ResolutionSelector.Builder().setResolutionStrategy(
         ResolutionStrategy(
             cameraResolution,
@@ -59,6 +67,7 @@ class NativeCameraView(
     }
 
     init {
+        ScannerController.setUp(binaryMessenger, this)
         val linearLayoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
@@ -114,6 +123,8 @@ class NativeCameraView(
     }
 
     override fun dispose() {
+        isTorchOn = false
+        camera?.cameraControl?.enableTorch(false)
         cameraExecutor.shutdown()
     }
 
@@ -125,9 +136,24 @@ class NativeCameraView(
       imageProxy.let { image ->
             val codes = barcodeScanner.read(image)
             if (codes.isNotEmpty()) {
+                val scannedCodes : MutableList<String> = emptyList<String>().toMutableList()
                 for (code in codes) {
                     Log.d("QR_RESULT", "Barcode: ${code.text}")
+                    if(code.text != null) {
+                        scannedCodes += code.text!!
+                    }
                 }
+                if(scannedCodes.isNotEmpty()){
+                    activity.runOnUiThread { scannerFlutterApi.onScanSuccess(scannedCodes) {
+                        it.onSuccess {
+                            Log.d("Scanner", "Successfully sent codes to Flutter")
+                        }.onFailure { error ->
+                            Log.e("Scanner", "Error sending codes to Flutter", error)
+                        }
+                    }
+                    }
+                }
+
             }
           image.close()
         }
@@ -141,7 +167,7 @@ class NativeCameraView(
         preview.scaleType = PreviewView.ScaleType.FILL_CENTER
         preview.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
+         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             mCameraProvider = cameraProvider
@@ -159,7 +185,7 @@ class NativeCameraView(
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
+                camera =  cameraProvider.bindToLifecycle(
                     activity as LifecycleOwner,
                     cameraSelector,
                     surfacePreview,
@@ -171,4 +197,21 @@ class NativeCameraView(
         }, ContextCompat.getMainExecutor(context))
     }
 
+    override fun toggleTorch(): Boolean {
+        isTorchOn = !isTorchOn
+        camera?.cameraControl?.enableTorch(isTorchOn)
+        return isTorchOn
+    }
+
+    override fun startScanner() {
+        startCamera()
+    }
+
+    override fun stopScanner() {
+        mCameraProvider?.unbindAll()
+    }
+
+    override fun disposeScanner() {
+        dispose()
+    }
 }

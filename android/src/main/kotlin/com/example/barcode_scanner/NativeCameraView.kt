@@ -47,7 +47,7 @@ class NativeCameraView(
     private var  barcodeReader: BarcodeReader
     private var camera: Camera? = null
     private var isTorchOn = false
-    private val defaultResolution = Size(1280, 720)
+    private val defaultResolution = Size(1366, 768)
     private var resolutionSelectorBuilder: ResolutionSelector.Builder
     private var imageAnalysisBuilder: ImageAnalysis
 
@@ -68,7 +68,7 @@ class NativeCameraView(
         )
         imageAnalysisBuilder = ImageAnalysis.Builder()
             .setResolutionSelector(resolutionSelectorBuilder.build())
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_BLOCK_PRODUCER)
             .setImageQueueDepth(1)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
             .setTargetRotation(Surface.ROTATION_0)
@@ -92,6 +92,7 @@ class NativeCameraView(
         )
         preview.scaleType = PreviewView.ScaleType.FILL_CENTER
         preview.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+
         linearLayout.addView(preview)
         setUpCamera()
 
@@ -202,6 +203,7 @@ class NativeCameraView(
                     surfacePreview,
                     imageAnalysisBuilder,
                 )
+
             } catch (exc: Exception) {
                 // Do nothing on exception
             }
@@ -211,7 +213,7 @@ class NativeCameraView(
      private fun calculateCameraResolution(value: Any?): Size {
         return when (value) {
             0 -> Size(640, 480)
-            1 -> Size(1280, 720)
+            1 -> Size(1366, 768)
             2 -> Size(1920, 1080)
             else -> defaultResolution
         }

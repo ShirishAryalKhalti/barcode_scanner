@@ -68,10 +68,9 @@ class NativeCameraView(
         )
         imageAnalysisBuilder = ImageAnalysis.Builder()
             .setResolutionSelector(resolutionSelectorBuilder.build())
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_BLOCK_PRODUCER)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setImageQueueDepth(1)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-            .setTargetRotation(Surface.ROTATION_0)
             .build()
 
 

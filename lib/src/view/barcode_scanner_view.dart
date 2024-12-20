@@ -40,6 +40,7 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
   initState() {
     ScannerFlutterApi.setUp(this);
     creationParams['scanner_resolution'] = widget.resolution.val;
+    creationParams['barcode_formats'] = widget.formats.map((e) => e.name.toLowerCase()).toList();
     super.initState();
   }
 

@@ -103,7 +103,7 @@ class NativeCameraView(
             }
         })
         options = BarcodeReader.Options().apply {
-            formats = setOf(BarcodeReader.Format.QR_CODE)
+            formats = getBarcodeFormats(creationParams?.get("barcode_formats"))
             tryRotate = true
             tryInvert = true
             tryHarder = true
@@ -177,11 +177,6 @@ class NativeCameraView(
     }
 
     private fun startCamera() {
-        Log.d("CAMERA", "Starting camera")
-        imageAnalysisBuilder.resolutionInfo?.resolution?.let {
-            Log.d("RESOLUTION", "Resolution: ${it.width}x${it.height}")
-        }
-
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
          cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
@@ -220,6 +215,23 @@ class NativeCameraView(
             2 -> Size(1920, 1080)
             else -> defaultResolution
         }
+    }
+
+    private fun getBarcodeFormats(formats: Any?): Set<BarcodeReader.Format> {
+        if(formats == null || formats !is List<*>) {
+            return setOf(BarcodeReader.Format.QR_CODE)
+        }
+        val barcodeFormats = mutableSetOf<BarcodeReader.Format>()
+        for (format in BarcodeReader.Format.entries) {
+            val value = format.name.lowercase().replace("_", "")
+            if (formats.contains(value)) {
+                barcodeFormats.add(format)
+            }
+        }
+        if(barcodeFormats.isEmpty()){
+            return setOf(BarcodeReader.Format.QR_CODE)
+        }
+        return barcodeFormats
     }
 
     override fun toggleTorch(): Boolean {

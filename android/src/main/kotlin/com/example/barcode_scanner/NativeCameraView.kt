@@ -1,6 +1,7 @@
 package com.example.barcode_scanner
 
 import ScannerController
+import ScannerError
 import ScannerFlutterApi
 import android.Manifest
 import android.annotation.SuppressLint
@@ -204,7 +205,14 @@ class NativeCameraView(
                 )
 
             } catch (exc: Exception) {
-                // Do nothing on exception
+                Log.e("Camera", "Use case binding failed", exc)
+                scannerFlutterApi.onScanError(ScannerError(exc.message)) {
+                    it.onSuccess {
+                        Log.d("Scanner", "Successfully sent error to Flutter")
+                    }.onFailure { error ->
+                        Log.e("Scanner", "Error sending error to Flutter", error)
+                    }
+                }
             }
         }, ContextCompat.getMainExecutor(context))
     }

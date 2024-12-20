@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:barcode_scanner/barcode_scanner.dart';
 import 'package:barcode_scanner_example/native_scanner_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -48,16 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           NativeScannerView(
-              resolution: ScannerResolution.hd720p,
-              onScanSuccess: (codes) async {
-                await _controller.stopScanner();
-                if (isDialogVisible) return;
-                isDialogVisible = true;
-                await _showQRDialog(context, codes);
-                isDialogVisible = false;
-                await _controller.startScanner();
-              },
-              onError: (error) {}),
+            resolution: ScannerResolution.hd720p,
+            onScanSuccess: (codes) async {
+              DateTime now = DateTime.now();
+              unawaited(_controller.stopScanner());
+              if (isDialogVisible) return;
+              isDialogVisible = true;
+              await _showQRDialog(context, codes);
+              isDialogVisible = false;
+              unawaited(_controller.startScanner());
+            },
+            onError: (error) {},
+          ),
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Row(

@@ -124,7 +124,7 @@ class NativeCameraView(
         }
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        imageAnalysisBuilder.setAnalyzer(
+        imageAnalysisBuilder.setAnalyzer(   
             cameraExecutor
         ) { imageProxy ->
             processImageProxy(barcodeReader, imageProxy)

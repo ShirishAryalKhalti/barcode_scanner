@@ -8,18 +8,24 @@ class NativeScannerView extends StatefulWidget {
     super.key,
     required this.onScanSuccess,
     required this.onError,
+    this.resolution = ScannerResolution.hd720p,
   });
 
   final void Function(List<String> codes) onScanSuccess;
   final void Function(ScannerError error) onError;
+  final ScannerResolution resolution;
+
   @override
   State<NativeScannerView> createState() => _NativeScannerViewState();
 }
 
 class _NativeScannerViewState extends State<NativeScannerView> implements ScannerFlutterApi {
+  final creationParams = <String, dynamic>{};
+
   @override
   initState() {
     ScannerFlutterApi.setUp(this);
+    creationParams['scanner_resolution'] = widget.resolution.val;
     super.initState();
   }
 
@@ -28,7 +34,6 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
     // This is used in the platform side to register the view.
     const String viewType = '<platform-view-type>';
     // Pass parameters to the platform side.
-    final Map<String, dynamic> creationParams = <String, dynamic>{'resolution': '1080p', 'camera_position': 'back'};
 
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => AndroidView(
@@ -54,10 +59,11 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
   void onScanError(ScannerError error) => widget.onError(error);
 }
 
-// if the selected quality is not available then [hd1280x720] will be used as default
 enum ScannerResolution {
-  hd4K3840x2160,
-  hd1920x1080,
-  hd1280x720,
-  vga640x480,
+  sd480p(0),
+  hd720p(1),
+  hd1080p(2);
+
+  const ScannerResolution(this.val);
+  final int val;
 }

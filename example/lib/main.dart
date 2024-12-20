@@ -48,16 +48,16 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           NativeScannerView(
-            onScanSuccess: (codes) async {
-              await _controller.stopScanner();
-              if (isDialogVisible) return;
-              isDialogVisible = true;
-              await _showQRDialog(context, codes);
-              isDialogVisible = false;
-              await _controller.startScanner();
-            },
-            onError: (error) {},
-          ),
+              resolution: ScannerResolution.hd720p,
+              onScanSuccess: (codes) async {
+                await _controller.stopScanner();
+                if (isDialogVisible) return;
+                isDialogVisible = true;
+                await _showQRDialog(context, codes);
+                isDialogVisible = false;
+                await _controller.startScanner();
+              },
+              onError: (error) {}),
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Row(

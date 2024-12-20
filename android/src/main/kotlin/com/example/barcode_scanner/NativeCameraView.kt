@@ -9,13 +9,17 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import android.util.Size
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import androidx.camera.core.MeteringPoint
 import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
@@ -45,21 +49,10 @@ class NativeCameraView(
     private  lateinit var  barcodeReader: BarcodeReader
     private var camera: androidx.camera.core.Camera? = null
     private var isTorchOn = false
+    private val defaultResolution = Size(1280, 720)
+    private var resolutionSelectorBuilder: ResolutionSelector.Builder
+    private var imageAnalysisBuilder: ImageAnalysis
 
-
-//    private val cameraResolution = Size(1920, 1080)
-    private val cameraResolution = Size(1280, 720)
-    private val selectorBuilder = ResolutionSelector.Builder().setResolutionStrategy(
-        ResolutionStrategy(
-            cameraResolution,
-            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER
-        )
-    )
-
-    private var analysisUseCase: ImageAnalysis = ImageAnalysis.Builder()
-        .setResolutionSelector(selectorBuilder.build())
-        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-        .build()
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
@@ -67,20 +60,40 @@ class NativeCameraView(
     }
 
     init {
+        val resolutionValue = creationParams?.get("resolution") as Map<*, *>?
+        val resolution = calculateCameraResolution(resolutionValue?.get("value"))
+        resolutionSelectorBuilder = ResolutionSelector.Builder().setResolutionStrategy(
+            ResolutionStrategy(
+                resolution,
+                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER
+            )
+        )
+        imageAnalysisBuilder = ImageAnalysis.Builder()
+            .setResolutionSelector(resolutionSelectorBuilder.build())
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setImageQueueDepth(1)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+            .setTargetRotation(Surface.ROTATION_0)
+            .build()
+
+
         ScannerController.setUp(binaryMessenger, this)
+        Log.d("CREATION_PARAMS", creationParams.toString())
         val linearLayoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
         linearLayout.layoutParams = linearLayoutParams
+
         linearLayout.orientation = LinearLayout.VERTICAL
 
         preview.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-
+        preview.scaleType = PreviewView.ScaleType.FILL_CENTER
+        preview.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         linearLayout.addView(preview)
         setUpCamera()
 
@@ -91,6 +104,14 @@ class NativeCameraView(
                 preview.requestLayout()
             }
         })
+        options = BarcodeReader.Options().apply {
+            formats = setOf(BarcodeReader.Format.QR_CODE)
+            tryRotate = true
+            tryInvert = true
+            tryHarder = true
+            tryDownscale = true
+        }
+        barcodeReader = BarcodeReader(options)
     }
 
     private fun setUpCamera() {
@@ -102,16 +123,8 @@ class NativeCameraView(
             )
         }
         cameraExecutor = Executors.newSingleThreadExecutor()
-        options = BarcodeReader.Options().apply {
-            formats = setOf(BarcodeReader.Format.QR_CODE)
-            tryRotate = true
-            tryInvert = true
-            tryHarder = true
-            tryDownscale = true
 
-        }
-        barcodeReader = BarcodeReader(options)
-        analysisUseCase.setAnalyzer(
+        imageAnalysisBuilder.setAnalyzer(
             cameraExecutor
         ) { imageProxy ->
             processImageProxy(barcodeReader, imageProxy)
@@ -127,6 +140,7 @@ class NativeCameraView(
         camera?.cameraControl?.enableTorch(false)
         cameraExecutor.shutdown()
     }
+
 
     @SuppressLint("UnsafeOptInUsageError")
     private fun processImageProxy(
@@ -164,8 +178,11 @@ class NativeCameraView(
     }
 
     private fun startCamera() {
-        preview.scaleType = PreviewView.ScaleType.FILL_CENTER
-        preview.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        Log.d("CAMERA", "Starting camera")
+        imageAnalysisBuilder.resolutionInfo?.resolution?.let {
+            Log.d("RESOLUTION", "Resolution: ${it.width}x${it.height}")
+        }
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
          cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
@@ -174,7 +191,7 @@ class NativeCameraView(
 
             // Preview
             val surfacePreview = Preview.Builder()
-                .setResolutionSelector(selectorBuilder.build())
+                .setResolutionSelector(resolutionSelectorBuilder.build())
                 .build()
                 .also {
                     it.surfaceProvider = preview.surfaceProvider
@@ -189,12 +206,21 @@ class NativeCameraView(
                     activity as LifecycleOwner,
                     cameraSelector,
                     surfacePreview,
-                    analysisUseCase,
+                    imageAnalysisBuilder,
                 )
             } catch (exc: Exception) {
                 // Do nothing on exception
             }
         }, ContextCompat.getMainExecutor(context))
+    }
+
+     private fun calculateCameraResolution(value: Any?): Size {
+        return when (value) {
+            0 -> Size(640, 480)
+            1 -> Size(1280, 720)
+            2 -> Size(1920, 1080)
+            else -> defaultResolution
+        }
     }
 
     override fun toggleTorch(): Boolean {

@@ -11,7 +11,7 @@ public class BarcodeScannerPlugin: NSObject, FlutterPlugin {
     let instance = BarcodeScannerPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     let factory = FLNativeViewFactory(messenger: registrar.messenger())
-    registrar.register(factory, withId: "<platform-view-type>")
+    registrar.register(factory, withId: "barcode_scanner_view")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

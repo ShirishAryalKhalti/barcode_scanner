@@ -14,12 +14,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.LinearLayout
-import android.widget.Toast
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.camera.core.MeteringPoint
 import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
@@ -45,9 +43,9 @@ class NativeCameraView(
     private var preview: PreviewView = PreviewView(context)
     private var  scannerFlutterApi = ScannerFlutterApi(binaryMessenger)
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var options: BarcodeReader.Options
-    private  lateinit var  barcodeReader: BarcodeReader
-    private var camera: androidx.camera.core.Camera? = null
+    private var options: BarcodeReader.Options
+    private var  barcodeReader: BarcodeReader
+    private var camera: Camera? = null
     private var isTorchOn = false
     private val defaultResolution = Size(1280, 720)
     private var resolutionSelectorBuilder: ResolutionSelector.Builder
@@ -164,13 +162,14 @@ class NativeCameraView(
                         }.onFailure { error ->
                             Log.e("Scanner", "Error sending codes to Flutter", error)
                         }
-                    }
+                        }
                     }
                 }
 
             }
           image.close()
         }
+        imageProxy.close()
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {

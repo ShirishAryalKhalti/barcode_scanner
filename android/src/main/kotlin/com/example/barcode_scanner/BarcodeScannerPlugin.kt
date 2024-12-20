@@ -26,7 +26,7 @@ class BarcodeScannerPlugin: FlutterPlugin, ActivityAware {
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         pluginBinding!!
             .platformViewRegistry
-            .registerViewFactory("<platform-view-type>",
+            .registerViewFactory("barcode_scanner_view",
                 NativeViewFactory(binding.activity, binaryMessenger!!)
             )
     }

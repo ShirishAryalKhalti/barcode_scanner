@@ -9,11 +9,24 @@ class NativeScannerView extends StatefulWidget {
     required this.onScanSuccess,
     required this.onError,
     this.resolution = ScannerResolution.hd720p,
+    this.formats = const {BarcodeFormat.qrCode},
   });
 
+  /// Callback that is called when a barcode is scanned.
   final void Function(List<String> codes) onScanSuccess;
+
+  /// Callback that is called when an error occurs.
   final void Function(ScannerError error) onError;
+
+  /// The resolution to use for the camera.
+  ///
+  /// Defaults to [ScannerResolution.hd720p].
   final ScannerResolution resolution;
+
+  /// The barcode formats to scan for.
+  ///
+  /// Defaults to [BarcodeFormat.qrCode].
+  final Set<BarcodeFormat> formats;
 
   @override
   State<NativeScannerView> createState() => _NativeScannerViewState();
@@ -21,6 +34,7 @@ class NativeScannerView extends StatefulWidget {
 
 class _NativeScannerViewState extends State<NativeScannerView> implements ScannerFlutterApi {
   final creationParams = <String, dynamic>{};
+  final String viewType = 'barcode_scanner_view';
 
   @override
   initState() {
@@ -31,10 +45,6 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
 
   @override
   Widget build(BuildContext context) {
-    // This is used in the platform side to register the view.
-    const String viewType = '<platform-view-type>';
-    // Pass parameters to the platform side.
-
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => AndroidView(
           viewType: viewType,
@@ -57,13 +67,4 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
 
   @override
   void onScanError(ScannerError error) => widget.onError(error);
-}
-
-enum ScannerResolution {
-  sd480p(0),
-  hd720p(1),
-  hd1080p(2);
-
-  const ScannerResolution(this.val);
-  final int val;
 }

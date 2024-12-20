@@ -1,9 +1,3 @@
-import 'barcode_scanner_platform_interface.dart';
-
 export './src/generated/scanner.g.dart';
-
-class BarcodeScanner {
-  Future<String?> getPlatformVersion() {
-    return BarcodeScannerPlatform.instance.getPlatformVersion();
-  }
-}
+export 'src/view/barcode_scanner_view.dart';
+export './src/enums/barcode_scanner_enums.dart';

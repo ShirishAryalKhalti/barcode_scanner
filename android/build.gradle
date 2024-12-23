@@ -68,7 +68,6 @@ android {
 
         // zxing
         implementation ("io.github.zxing-cpp:android:2.2.0")
-
         implementation "androidx.activity:activity-compose:1.9.3" // Replace with the latest version
 
         // Add Compose UI dependencies if not already added

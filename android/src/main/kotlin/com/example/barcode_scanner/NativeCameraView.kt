@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import android.util.Size
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -34,9 +33,10 @@ import java.util.concurrent.Executors
 import zxingcpp.BarcodeReader
 
 class NativeCameraView(
-    private val context: Context, id: Int, creationParams: Map<String?, Any?>?,
+    private val context: Context,
+    creationParams: Map<String?, Any?>?,
     private val activity: Activity,
-    private val binaryMessenger: BinaryMessenger,
+    binaryMessenger: BinaryMessenger,
 ) : PlatformView, ScannerController{
 
     private var mCameraProvider: ProcessCameraProvider? = null
@@ -103,12 +103,15 @@ class NativeCameraView(
                 preview.requestLayout()
             }
         })
+
         options = BarcodeReader.Options().apply {
             formats = getBarcodeFormats(creationParams?.get("barcode_formats"))
             tryRotate = true
             tryInvert = true
             tryHarder = true
             tryDownscale = true
+            maxNumberOfSymbols = 1
+            binarizer = BarcodeReader.Binarizer.GLOBAL_HISTOGRAM
         }
         barcodeReader = BarcodeReader(options)
     }
@@ -183,7 +186,6 @@ class NativeCameraView(
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             mCameraProvider = cameraProvider
-
             // Preview
             val surfacePreview = Preview.Builder()
                 .setResolutionSelector(resolutionSelectorBuilder.build())
@@ -203,6 +205,7 @@ class NativeCameraView(
                     surfacePreview,
                     imageAnalysisBuilder,
                 )
+
 
             } catch (exc: Exception) {
                 Log.e("Camera", "Use case binding failed", exc)

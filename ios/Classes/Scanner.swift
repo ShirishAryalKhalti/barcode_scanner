@@ -26,7 +26,7 @@ final class PigeonError: Error {
   var localizedDescription: String {
     return
       "PigeonError(code: \(code), message: \(message ?? "<nil>"), details: \(details ?? "<nil>")"
-  }
+      }
 }
 
 private func wrapResult(_ result: Any?) -> [Any?] {
@@ -56,9 +56,7 @@ private func wrapError(_ error: Any) -> [Any?] {
 }
 
 private func createConnectionError(withChannelName channelName: String) -> PigeonError {
-  return PigeonError(
-    code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.",
-    details: "")
+  return PigeonError(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
 }
 
 private func isNullish(_ value: Any?) -> Bool {
@@ -74,6 +72,8 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 struct ScannerError {
   var message: String? = nil
   var tag: String? = nil
+
+
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> ScannerError? {
@@ -131,10 +131,8 @@ class ScannerPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
 
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol ScannerFlutterApiProtocol {
-  func onScanSuccess(
-    codes codesArg: [String], completion: @escaping (Result<Void, PigeonError>) -> Void)
-  func onScanError(
-    error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func onScanSuccess(codes codesArg: [String], completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void)
 }
 class ScannerFlutterApi: ScannerFlutterApiProtocol {
   private let binaryMessenger: FlutterBinaryMessenger
@@ -146,13 +144,9 @@ class ScannerFlutterApi: ScannerFlutterApiProtocol {
   var codec: ScannerPigeonCodec {
     return ScannerPigeonCodec.shared
   }
-  func onScanSuccess(
-    codes codesArg: [String], completion: @escaping (Result<Void, PigeonError>) -> Void
-  ) {
-    let channelName: String =
-      "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess\(messageChannelSuffix)"
-    let channel = FlutterBasicMessageChannel(
-      name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+  func onScanSuccess(codes codesArg: [String], completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([codesArg] as [Any?]) { response in
       guard let listResponse = response as? [Any?] else {
         completion(.failure(createConnectionError(withChannelName: channelName)))
@@ -168,13 +162,9 @@ class ScannerFlutterApi: ScannerFlutterApiProtocol {
       }
     }
   }
-  func onScanError(
-    error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void
-  ) {
-    let channelName: String =
-      "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanError\(messageChannelSuffix)"
-    let channel = FlutterBasicMessageChannel(
-      name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+  func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanError\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([errorArg] as [Any?]) { response in
       guard let listResponse = response as? [Any?] else {
         completion(.failure(createConnectionError(withChannelName: channelName)))
@@ -203,14 +193,9 @@ protocol ScannerController {
 class ScannerControllerSetup {
   static var codec: FlutterStandardMessageCodec { ScannerPigeonCodec.shared }
   /// Sets up an instance of `ScannerController` to handle messages through the `binaryMessenger`.
-  static func setUp(
-    binaryMessenger: FlutterBinaryMessenger, api: ScannerController?,
-    messageChannelSuffix: String = ""
-  ) {
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: ScannerController?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-    let toggleTorchChannel = FlutterBasicMessageChannel(
-      name: "dev.flutter.pigeon.barcode_scanner.ScannerController.toggleTorch\(channelSuffix)",
-      binaryMessenger: binaryMessenger, codec: codec)
+    let toggleTorchChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.barcode_scanner.ScannerController.toggleTorch\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       toggleTorchChannel.setMessageHandler { _, reply in
         do {
@@ -223,9 +208,7 @@ class ScannerControllerSetup {
     } else {
       toggleTorchChannel.setMessageHandler(nil)
     }
-    let startScannerChannel = FlutterBasicMessageChannel(
-      name: "dev.flutter.pigeon.barcode_scanner.ScannerController.startScanner\(channelSuffix)",
-      binaryMessenger: binaryMessenger, codec: codec)
+    let startScannerChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.barcode_scanner.ScannerController.startScanner\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       startScannerChannel.setMessageHandler { _, reply in
         do {
@@ -238,9 +221,7 @@ class ScannerControllerSetup {
     } else {
       startScannerChannel.setMessageHandler(nil)
     }
-    let stopScannerChannel = FlutterBasicMessageChannel(
-      name: "dev.flutter.pigeon.barcode_scanner.ScannerController.stopScanner\(channelSuffix)",
-      binaryMessenger: binaryMessenger, codec: codec)
+    let stopScannerChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.barcode_scanner.ScannerController.stopScanner\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       stopScannerChannel.setMessageHandler { _, reply in
         do {
@@ -253,9 +234,7 @@ class ScannerControllerSetup {
     } else {
       stopScannerChannel.setMessageHandler(nil)
     }
-    let disposeScannerChannel = FlutterBasicMessageChannel(
-      name: "dev.flutter.pigeon.barcode_scanner.ScannerController.disposeScanner\(channelSuffix)",
-      binaryMessenger: binaryMessenger, codec: codec)
+    let disposeScannerChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.barcode_scanner.ScannerController.disposeScanner\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       disposeScannerChannel.setMessageHandler { _, reply in
         do {

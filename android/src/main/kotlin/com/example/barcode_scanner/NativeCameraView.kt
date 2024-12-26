@@ -154,6 +154,7 @@ class NativeCameraView(
             if (codes.isNotEmpty()) {
                 val scannedCodes : MutableList<String> = emptyList<String>().toMutableList()
                 for (code in codes) {
+
                     Log.d("QR_RESULT", "Barcode: ${code.text}")
                     if(code.text != null) {
                         scannedCodes += code.text!!
@@ -233,6 +234,7 @@ class NativeCameraView(
         if(formats == null || formats !is List<*>) {
             return setOf(BarcodeReader.Format.QR_CODE)
         }
+
         val barcodeFormats = mutableSetOf<BarcodeReader.Format>()
         for (format in BarcodeReader.Format.entries) {
             val value = format.name.lowercase().replace("_", "")

@@ -229,6 +229,8 @@ class NativeCameraView(
         }
     }
 
+
+    @kotlin.ExperimentalStdlibApi
     private fun getBarcodeFormats(formats: Any?): Set<BarcodeReader.Format> {
         if(formats == null || formats !is List<*>) {
             return setOf(BarcodeReader.Format.QR_CODE)

@@ -5,9 +5,9 @@ import 'package:pigeon/pigeon.dart';
     dartOut: 'lib/src/generated/scanner.g.dart',
     dartOptions: DartOptions(),
     swiftOut: 'ios/Classes/Scanner.swift',
-    swiftOptions: SwiftOptions(),
+    swiftOptions: SwiftOptions(errorClassName: 'BarcodeScannerException'),
     kotlinOut: 'android/src/main/kotlin/com/example/barcode_scanner/Scanner.kt',
-    kotlinOptions: KotlinOptions(),
+    kotlinOptions: KotlinOptions(errorClassName: 'BarcodeScannerException'),
   ),
 )
 class ScannedCode {

@@ -12,7 +12,7 @@ import Foundation
 #endif
 
 /// Error class for passing custom error details to Dart side.
-final class PigeonError: Error {
+final class BarcodeScannerException: Error {
   let code: String
   let message: String?
   let details: Any?
@@ -25,7 +25,7 @@ final class PigeonError: Error {
 
   var localizedDescription: String {
     return
-      "PigeonError(code: \(code), message: \(message ?? "<nil>"), details: \(details ?? "<nil>")"
+      "BarcodeScannerException(code: \(code), message: \(message ?? "<nil>"), details: \(details ?? "<nil>")"
       }
 }
 
@@ -34,7 +34,7 @@ private func wrapResult(_ result: Any?) -> [Any?] {
 }
 
 private func wrapError(_ error: Any) -> [Any?] {
-  if let pigeonError = error as? PigeonError {
+  if let pigeonError = error as? BarcodeScannerException {
     return [
       pigeonError.code,
       pigeonError.message,
@@ -55,8 +55,8 @@ private func wrapError(_ error: Any) -> [Any?] {
   ]
 }
 
-private func createConnectionError(withChannelName channelName: String) -> PigeonError {
-  return PigeonError(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
+private func createConnectionError(withChannelName channelName: String) -> BarcodeScannerException {
+  return BarcodeScannerException(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
 }
 
 private func isNullish(_ value: Any?) -> Bool {
@@ -161,8 +161,8 @@ class ScannerPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
 
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol ScannerFlutterApiProtocol {
-  func onScanSuccess(codes codesArg: [ScannedCode], completion: @escaping (Result<Void, PigeonError>) -> Void)
-  func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func onScanSuccess(codes codesArg: [ScannedCode], completion: @escaping (Result<Void, BarcodeScannerException>) -> Void)
+  func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, BarcodeScannerException>) -> Void)
 }
 class ScannerFlutterApi: ScannerFlutterApiProtocol {
   private let binaryMessenger: FlutterBinaryMessenger
@@ -174,7 +174,7 @@ class ScannerFlutterApi: ScannerFlutterApiProtocol {
   var codec: ScannerPigeonCodec {
     return ScannerPigeonCodec.shared
   }
-  func onScanSuccess(codes codesArg: [ScannedCode], completion: @escaping (Result<Void, PigeonError>) -> Void) {
+  func onScanSuccess(codes codesArg: [ScannedCode], completion: @escaping (Result<Void, BarcodeScannerException>) -> Void) {
     let channelName: String = "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess\(messageChannelSuffix)"
     let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([codesArg] as [Any?]) { response in
@@ -186,13 +186,13 @@ class ScannerFlutterApi: ScannerFlutterApiProtocol {
         let code: String = listResponse[0] as! String
         let message: String? = nilOrValue(listResponse[1])
         let details: String? = nilOrValue(listResponse[2])
-        completion(.failure(PigeonError(code: code, message: message, details: details)))
+        completion(.failure(BarcodeScannerException(code: code, message: message, details: details)))
       } else {
         completion(.success(Void()))
       }
     }
   }
-  func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+  func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, BarcodeScannerException>) -> Void) {
     let channelName: String = "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanError\(messageChannelSuffix)"
     let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([errorArg] as [Any?]) { response in
@@ -204,7 +204,7 @@ class ScannerFlutterApi: ScannerFlutterApiProtocol {
         let code: String = listResponse[0] as! String
         let message: String? = nilOrValue(listResponse[1])
         let details: String? = nilOrValue(listResponse[2])
-        completion(.failure(PigeonError(code: code, message: message, details: details)))
+        completion(.failure(BarcodeScannerException(code: code, message: message, details: details)))
       } else {
         completion(.success(Void()))
       }

@@ -16,7 +16,7 @@ private fun wrapResult(result: Any?): List<Any?> {
 }
 
 private fun wrapError(exception: Throwable): List<Any?> {
-  return if (exception is FlutterError) {
+  return if (exception is BarcodeScannerException) {
     listOf(
       exception.code,
       exception.message,
@@ -31,8 +31,8 @@ private fun wrapError(exception: Throwable): List<Any?> {
   }
 }
 
-private fun createConnectionError(channelName: String): FlutterError {
-  return FlutterError("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")}
+private fun createConnectionError(channelName: String): BarcodeScannerException {
+  return BarcodeScannerException("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")}
 
 /**
  * Error class for passing custom error details to Flutter via a thrown PlatformException.
@@ -40,7 +40,7 @@ private fun createConnectionError(channelName: String): FlutterError {
  * @property message The error message.
  * @property details The error details. Must be a datatype supported by the api codec.
  */
-class FlutterError (
+class BarcodeScannerException (
   val code: String,
   override val message: String? = null,
   val details: Any? = null
@@ -134,7 +134,7 @@ class ScannerFlutterApi(private val binaryMessenger: BinaryMessenger, private va
     channel.send(listOf(codesArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+          callback(Result.failure(BarcodeScannerException(it[0] as String, it[1] as String, it[2] as String?)))
         } else {
           callback(Result.success(Unit))
         }
@@ -151,7 +151,7 @@ class ScannerFlutterApi(private val binaryMessenger: BinaryMessenger, private va
     channel.send(listOf(errorArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+          callback(Result.failure(BarcodeScannerException(it[0] as String, it[1] as String, it[2] as String?)))
         } else {
           callback(Result.success(Unit))
         }

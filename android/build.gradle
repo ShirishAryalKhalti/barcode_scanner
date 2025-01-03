@@ -49,14 +49,6 @@ android {
         minSdk = 21
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion "1.5.3" // Use the same version as your Compose library
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")

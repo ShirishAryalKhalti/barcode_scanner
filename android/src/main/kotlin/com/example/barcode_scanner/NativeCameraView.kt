@@ -106,7 +106,8 @@ class NativeCameraView(
         })
 
         options = BarcodeReader.Options().apply {
-            formats = getBarcodeFormats(creationParams?.get("barcode_formats"))
+//            formats = getBarcodeFormats(creationParams?.get("barcode_formats"))
+            formats = setOf(BarcodeReader.Format.QR_CODE)
             tryRotate = true
             tryInvert = true
             tryHarder = true
@@ -230,24 +231,24 @@ class NativeCameraView(
     }
 
 
-    @kotlin.ExperimentalStdlibApi
-    private fun getBarcodeFormats(formats: Any?): Set<BarcodeReader.Format> {
-        if(formats == null || formats !is List<*>) {
-            return setOf(BarcodeReader.Format.QR_CODE)
-        }
-
-        val barcodeFormats = mutableSetOf<BarcodeReader.Format>()
-        for (format in BarcodeReader.Format.entries) {
-            val value = format.name.lowercase().replace("_", "")
-            if (formats.contains(value)) {
-                barcodeFormats.add(format)
-            }
-        }
-        if(barcodeFormats.isEmpty()){
-            return setOf(BarcodeReader.Format.QR_CODE)
-        }
-        return barcodeFormats
-    }
+//    @kotlin.ExperimentalStdlibApi
+//    private fun getBarcodeFormats(formats: Any?): Set<BarcodeReader.Format> {
+//        if(formats == null || formats !is List<*>) {
+//            return setOf(BarcodeReader.Format.QR_CODE)
+//        }
+//
+//        val barcodeFormats = mutableSetOf<BarcodeReader.Format>()
+//        for (format in BarcodeReader.Format.entries) {
+//            val value = format.name.lowercase().replace("_", "")
+//            if (formats.contains(value)) {
+//                barcodeFormats.add(format)
+//            }
+//        }
+//        if(barcodeFormats.isEmpty()){
+//            return setOf(BarcodeReader.Format.QR_CODE)
+//        }
+//        return barcodeFormats
+//    }
 
     override fun toggleTorch(): Boolean {
         isTorchOn = !isTorchOn

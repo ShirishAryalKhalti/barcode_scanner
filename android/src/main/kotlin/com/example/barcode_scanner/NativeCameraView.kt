@@ -152,10 +152,10 @@ class NativeCameraView(
     ) {
       imageProxy.let { image ->
             val codes = barcodeScanner.read(image)
+            image.close()
             if (codes.isNotEmpty()) {
                 val scannedCodes : MutableList<ScannedCode> = emptyList<ScannedCode>().toMutableList()
                 for (code in codes) {
-
                     Log.d("QR_RESULT", "Barcode: ${code.text}")
                     if(code.text != null) {
                         scannedCodes.add(ScannedCode(code.text!!, format = code.format.name))
@@ -171,9 +171,7 @@ class NativeCameraView(
                         }
                     }
                 }
-
             }
-          image.close()
         }
         imageProxy.close()
     }

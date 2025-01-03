@@ -24,10 +24,11 @@ class ViewController: UIViewController {
     }
     
     
-    let device = AVCaptureDevice.default(for: .video)!
+//    let device = AVCaptureDevice.default(for: .video)!
     let captureSession = AVCaptureSession()
     lazy var preview = AVCaptureVideoPreviewLayer(session: captureSession)
     let queue = DispatchQueue(label: "com.zxing_cpp.ios")
+    var isTorchOn: Bool = false
     
     private let reader: ZXIBarcodeReader = {
         let reader = ZXIBarcodeReader()
@@ -118,8 +119,10 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-        if let downscaledBuffer = downscaleImageBuffer(imageBuffer) {
-            if let result = try? reader.read(downscaledBuffer) {
+        
+    
+
+        if let result = try? reader.read(imageBuffer) {
                 if(!result.isEmpty){
                     var codes: [ScannedCode] = []
                     for code in result{
@@ -137,7 +140,6 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 }
                
             }
-        }
         self.zxingLock.signal()
     }
 
@@ -148,6 +150,8 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 }
 
 extension ViewController {
+    // Check if downscaling image beforing feeding to zxing model improve performance
+    
     func downscaleImageBuffer(_ imageBuffer: CVImageBuffer) -> CVPixelBuffer? {
         let newWidth = 640  // Target width (adjust as needed)
         let newHeight = 480  // Target height (adjust as needed)
@@ -194,7 +198,7 @@ extension ViewController {
 
 extension ViewController {
     func startCamera() {
-        DispatchQueue.main.async {
+        DispatchQueue.global(qos: .background).async {
             self.captureSession.startRunning()
         }
     }
@@ -205,8 +209,43 @@ extension ViewController {
         }
     }
     
+    func toggleTorch()-> Bool {
+
+        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInTripleCamera], mediaType: AVMediaType.video, position: .back)
+
+        guard let device = deviceDiscoverySession.devices.first
+        else {return isTorchOn}
+        
+        if device.hasTorch {
+            do {
+                try device.lockForConfiguration()
+                let on = device.isTorchActive
+                if on != true && device.isTorchModeSupported(.on) {
+                    try device.setTorchModeOn(level: 1.0)
+                    isTorchOn = true
+                } else if device.isTorchModeSupported(.off){
+                    device.torchMode = .off
+                    isTorchOn = false
+                } else {
+                    print("Torch mode is not supported")
+                }
+                device.unlockForConfiguration()
+            } catch {
+                print("Torch could not be used")
+            }
+        } else {
+            print("Torch is not available")
+        }
+        return isTorchOn
+    }
+
+
+
     func dispose() {
         DispatchQueue.main.async {
+//            if self.device.hasTorch {
+//                self.device.torchMode = .off
+//            }
             // Stop the capture session
             self.captureSession.stopRunning()
             // Remove all inputs and outputs

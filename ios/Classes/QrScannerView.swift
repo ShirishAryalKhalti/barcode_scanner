@@ -5,7 +5,7 @@ import SwiftUI
 class BarcodeScannerPlatformView: NSObject, FlutterPlatformView {
     private var qrScannerView: ViewController
     private var scannerController: ScannerControllerImpl
-    
+
     init(
         frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?,
         binaryMessenger messenger: FlutterBinaryMessenger
@@ -18,7 +18,7 @@ class BarcodeScannerPlatformView: NSObject, FlutterPlatformView {
         qrScannerView = ViewController(
             flutterApi: ScannerFlutterApi.init(binaryMessenger: messenger)
         )
-        
+
         scannerController = ScannerControllerImpl(view: qrScannerView)
         ScannerControllerSetup.setUp(binaryMessenger: messenger, api: scannerController)
         qrScannerView.view.frame = frame
@@ -33,8 +33,6 @@ class BarcodeScannerPlatformView: NSObject, FlutterPlatformView {
 
 class ScannerControllerImpl: NSObject, ScannerController {
     var view: ViewController
-    let device = AVCaptureDevice.default(for: .video)!
-    @State private var isTorchOn: Bool = false
 
     init(view: ViewController) {
         self.view = view
@@ -52,30 +50,10 @@ class ScannerControllerImpl: NSObject, ScannerController {
     }
 
     func disposeScanner() throws {
-        device.torchMode = .off
         self.view.dispose()
     }
 
     func toggleTorch() throws -> Bool {
-        if !device.hasTorch {
-            return false
-        }
-
-        do {
-            try device.lockForConfiguration()
-
-            if device.torchMode == .on {
-                device.torchMode = .off
-
-            } else {
-                try device.setTorchModeOn(level: 1.0)
-            }
-
-            device.unlockForConfiguration()
-            isTorchOn = device.torchMode == .on
-        } catch {
-            print("Failed to toggle torch: \(error.localizedDescription)")
-        }
-        return isTorchOn
+        return self.view.toggleTorch()
     }
 }

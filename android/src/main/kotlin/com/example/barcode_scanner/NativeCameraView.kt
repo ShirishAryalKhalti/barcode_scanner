@@ -1,5 +1,6 @@
 package com.example.barcode_scanner
 
+import ScannedCode
 import ScannerController
 import ScannerError
 import ScannerFlutterApi
@@ -48,7 +49,7 @@ class NativeCameraView(
     private var  barcodeReader: BarcodeReader
     private var camera: Camera? = null
     private var isTorchOn = false
-    private val defaultResolution = Size(1366, 768)
+    private val defaultResolution = Size(1280, 720)
     private var resolutionSelectorBuilder: ResolutionSelector.Builder
     private var imageAnalysisBuilder: ImageAnalysis
 
@@ -151,12 +152,13 @@ class NativeCameraView(
     ) {
       imageProxy.let { image ->
             val codes = barcodeScanner.read(image)
+            image.close()
             if (codes.isNotEmpty()) {
-                val scannedCodes : MutableList<String> = emptyList<String>().toMutableList()
+                val scannedCodes : MutableList<ScannedCode> = emptyList<ScannedCode>().toMutableList()
                 for (code in codes) {
                     Log.d("QR_RESULT", "Barcode: ${code.text}")
                     if(code.text != null) {
-                        scannedCodes += code.text!!
+                        scannedCodes.add(ScannedCode(code.text!!, format = code.format.name))
                     }
                 }
                 if(scannedCodes.isNotEmpty()){
@@ -169,9 +171,7 @@ class NativeCameraView(
                         }
                     }
                 }
-
             }
-          image.close()
         }
         imageProxy.close()
     }
@@ -223,7 +223,7 @@ class NativeCameraView(
      private fun calculateCameraResolution(value: Any?): Size {
         return when (value) {
             0 -> Size(640, 480)
-            1 -> Size(1366, 768)
+            1 -> Size(1280, 720)
             2 -> Size(1920, 1080)
             else -> defaultResolution
         }
@@ -233,6 +233,7 @@ class NativeCameraView(
         if(formats == null || formats !is List<*>) {
             return setOf(BarcodeReader.Format.QR_CODE)
         }
+
         val barcodeFormats = mutableSetOf<BarcodeReader.Format>()
         for (format in BarcodeReader.Format.entries) {
             val value = format.name.lowercase().replace("_", "")

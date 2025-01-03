@@ -47,6 +47,27 @@ class FlutterError (
 ) : Throwable()
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class ScannedCode (
+  val text: String? = null,
+  val format: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ScannedCode {
+      val text = pigeonVar_list[0] as String?
+      val format = pigeonVar_list[1] as String?
+      return ScannedCode(text, format)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      text,
+      format,
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class ScannerError (
   val message: String? = null,
   val tag: String? = null
@@ -71,6 +92,11 @@ private open class ScannerPigeonCodec : StandardMessageCodec() {
     return when (type) {
       129.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          ScannedCode.fromList(it)
+        }
+      }
+      130.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           ScannerError.fromList(it)
         }
       }
@@ -79,8 +105,12 @@ private open class ScannerPigeonCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is ScannerError -> {
+      is ScannedCode -> {
         stream.write(129)
+        writeValue(stream, value.toList())
+      }
+      is ScannerError -> {
+        stream.write(130)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -96,7 +126,7 @@ class ScannerFlutterApi(private val binaryMessenger: BinaryMessenger, private va
       ScannerPigeonCodec()
     }
   }
-  fun onScanSuccess(codesArg: List<String>, callback: (Result<Unit>) -> Unit)
+  fun onScanSuccess(codesArg: List<ScannedCode>, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess$separatedMessageChannelSuffix"

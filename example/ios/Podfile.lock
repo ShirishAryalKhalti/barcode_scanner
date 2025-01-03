@@ -1,14 +1,24 @@
 PODS:
   - barcode_scanner (0.0.1):
     - Flutter
+    - zxing-cpp (~> 2.2.0)
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
+  - zxing-cpp (2.2.0):
+    - zxing-cpp/Wrapper (= 2.2.0)
+  - zxing-cpp/Core (2.2.0)
+  - zxing-cpp/Wrapper (2.2.0):
+    - zxing-cpp/Core
 
 DEPENDENCIES:
   - barcode_scanner (from `.symlinks/plugins/barcode_scanner/ios`)
   - Flutter (from `Flutter`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
+
+SPEC REPOS:
+  trunk:
+    - zxing-cpp
 
 EXTERNAL SOURCES:
   barcode_scanner:
@@ -19,10 +29,11 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  barcode_scanner: 3b2b788039b4a1d63071b365612709d667b5f9c4
+  barcode_scanner: 880a931ea5ad335a3cb20611bac5a9189c44094a
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  zxing-cpp: 7486c8459df40d8f6a5453cc1ec35e67b10cd25a
 
 PODFILE CHECKSUM: a57f30d18f102dd3ce366b1d62a55ecbef2158e5
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

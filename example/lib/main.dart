@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _showQRDialog(BuildContext context, List<String> codes) {
+  Future<void> _showQRDialog(BuildContext context, List<ScannedCode> codes) {
     return showCupertinoDialog(
       context: context,
       builder: (context) {
@@ -105,7 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       for (final code in codes)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(code),
+                          child: Text(
+                            '${code.format ?? 'UNKNOWN FORMAT'} \n${code.text ?? ''}',
+                          ),
                         ),
                     ],
                   ),

@@ -10,15 +10,14 @@ import 'package:pigeon/pigeon.dart';
     kotlinOptions: KotlinOptions(),
   ),
 )
-// class ScannedCode {
-//   String? text;
-//   BarcodeFormat? format;
-//   Uint8List? bytes;
-// }
+class ScannedCode {
+  String? text;
+  String? format;
+}
 
 @FlutterApi()
 abstract class ScannerFlutterApi {
-  void onScanSuccess(List<String> codes);
+  void onScanSuccess(List<ScannedCode> codes);
   void onScanError(ScannerError error);
 }
 

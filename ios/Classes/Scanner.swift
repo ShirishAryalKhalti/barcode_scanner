@@ -69,6 +69,31 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
+struct ScannedCode {
+  var text: String? = nil
+  var format: String? = nil
+
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ScannedCode? {
+    let text: String? = nilOrValue(pigeonVar_list[0])
+    let format: String? = nilOrValue(pigeonVar_list[1])
+
+    return ScannedCode(
+      text: text,
+      format: format
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      text,
+      format,
+    ]
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
 struct ScannerError {
   var message: String? = nil
   var tag: String? = nil
@@ -97,6 +122,8 @@ private class ScannerPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
     case 129:
+      return ScannedCode.fromList(self.readValue() as! [Any?])
+    case 130:
       return ScannerError.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -106,8 +133,11 @@ private class ScannerPigeonCodecReader: FlutterStandardReader {
 
 private class ScannerPigeonCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? ScannerError {
+    if let value = value as? ScannedCode {
       super.writeByte(129)
+      super.writeValue(value.toList())
+    } else if let value = value as? ScannerError {
+      super.writeByte(130)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -131,7 +161,7 @@ class ScannerPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
 
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol ScannerFlutterApiProtocol {
-  func onScanSuccess(codes codesArg: [String], completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func onScanSuccess(codes codesArg: [ScannedCode], completion: @escaping (Result<Void, PigeonError>) -> Void)
   func onScanError(error errorArg: ScannerError, completion: @escaping (Result<Void, PigeonError>) -> Void)
 }
 class ScannerFlutterApi: ScannerFlutterApiProtocol {
@@ -144,7 +174,7 @@ class ScannerFlutterApi: ScannerFlutterApiProtocol {
   var codec: ScannerPigeonCodec {
     return ScannerPigeonCodec.shared
   }
-  func onScanSuccess(codes codesArg: [String], completion: @escaping (Result<Void, PigeonError>) -> Void) {
+  func onScanSuccess(codes codesArg: [ScannedCode], completion: @escaping (Result<Void, PigeonError>) -> Void) {
     let channelName: String = "dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess\(messageChannelSuffix)"
     let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
     channel.sendMessage([codesArg] as [Any?]) { response in

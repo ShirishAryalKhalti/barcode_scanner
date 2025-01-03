@@ -48,7 +48,6 @@ class ViewController: UIViewController {
         self.preview.videoGravity = AVLayerVideoGravity.resizeAspectFill
         self.preview.frame = self.view.layer.bounds
         self.view.layer.addSublayer(self.preview)
-
         // setup camera session
         self.requestAccess {
             var discoverySession: AVCaptureDevice.DiscoverySession!
@@ -120,19 +119,23 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
         let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
         if let downscaledBuffer = downscaleImageBuffer(imageBuffer) {
-            if let result = try? reader.read(downscaledBuffer).first {
-                print("Found barcode of format", result.format.rawValue, "with text", result.text)
-                print("Barcode byte: \(result.bytes.base64EncodedString())")
-                flutterApi.onScanSuccess(codes: [
-                    result.text
-                ]) { result in
-                    switch result {
-                        case .success:
-                            print("Scan result sent successfully.")
-                        case .failure(let error):
-                            print("Error sending scan result: \(error)")  // Handle PigeonError appropriately
+            if let result = try? reader.read(downscaledBuffer) {
+                if(!result.isEmpty){
+                    var codes: [ScannedCode] = []
+                    for code in result{
+                        print("Found barcode of format", code.format.rawValue, "with text: \(code.text)")
+                        codes.append(ScannedCode(text: code.text, format: resolveBarcodeFormat(val: code.format.rawValue)))
+                    }
+                    flutterApi.onScanSuccess(codes: codes) { result in
+                        switch result {
+                            case .success:
+                                print("Scan result sent successfully.")
+                            case .failure(let error):
+                                print("Error sending scan result: \(error)")  // Handle PigeonError appropriately
+                        }
                     }
                 }
+               
             }
         }
         self.zxingLock.signal()
@@ -241,5 +244,23 @@ extension ViewController{
                case 18: return "UPC-E"
                default: return ""
            }
+    }
+    
+    func resolveResolution(val: Int) -> AVCaptureSession.Preset{
+        switch val {
+            case 0: return .vga640x480
+            case 1: return .hd1280x720
+            case 2: return .hd1920x1080
+            default: return .hd1280x720
+        }
+    }
+    
+    func bacodeFormatToInt(val: [String]) -> [Int]{
+        var formats: [Int] = []
+        for format in val{
+//            if(val.contains())
+        }
+        return formats
+      
     }
 }

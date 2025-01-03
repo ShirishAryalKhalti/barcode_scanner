@@ -25,6 +25,32 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   return <Object?>[error.code, error.message, error.details];
 }
 
+class ScannedCode {
+  ScannedCode({
+    this.text,
+    this.format,
+  });
+
+  String? text;
+
+  String? format;
+
+  Object encode() {
+    return <Object?>[
+      text,
+      format,
+    ];
+  }
+
+  static ScannedCode decode(Object result) {
+    result as List<Object?>;
+    return ScannedCode(
+      text: result[0] as String?,
+      format: result[1] as String?,
+    );
+  }
+}
+
 class ScannerError {
   ScannerError({
     this.message,
@@ -59,8 +85,11 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is ScannerError) {
+    }    else if (value is ScannedCode) {
       buffer.putUint8(129);
+      writeValue(buffer, value.encode());
+    }    else if (value is ScannerError) {
+      buffer.putUint8(130);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -71,6 +100,8 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129: 
+        return ScannedCode.decode(readValue(buffer)!);
+      case 130: 
         return ScannerError.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -81,7 +112,7 @@ class _PigeonCodec extends StandardMessageCodec {
 abstract class ScannerFlutterApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onScanSuccess(List<String> codes);
+  void onScanSuccess(List<ScannedCode> codes);
 
   void onScanError(ScannerError error);
 
@@ -98,9 +129,9 @@ abstract class ScannerFlutterApi {
           assert(message != null,
           'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final List<String>? arg_codes = (args[0] as List<Object?>?)?.cast<String>();
+          final List<ScannedCode>? arg_codes = (args[0] as List<Object?>?)?.cast<ScannedCode>();
           assert(arg_codes != null,
-              'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess was null, expected non-null List<String>.');
+              'Argument for dev.flutter.pigeon.barcode_scanner.ScannerFlutterApi.onScanSuccess was null, expected non-null List<ScannedCode>.');
           try {
             api.onScanSuccess(arg_codes!);
             return wrapResponse(empty: true);

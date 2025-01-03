@@ -13,7 +13,7 @@ class NativeScannerView extends StatefulWidget {
   });
 
   /// Callback that is called when a barcode is scanned.
-  final void Function(List<String> codes) onScanSuccess;
+  final void Function(List<ScannedCode> codes) onScanSuccess;
 
   /// Callback that is called when an error occurs.
   final void Function(ScannerError error) onError;
@@ -64,7 +64,7 @@ class _NativeScannerViewState extends State<NativeScannerView> implements Scanne
   }
 
   @override
-  void onScanSuccess(List<String> codes) => widget.onScanSuccess(codes);
+  void onScanSuccess(List<ScannedCode> codes) => widget.onScanSuccess(codes);
 
   @override
   void onScanError(ScannerError error) => widget.onError(error);

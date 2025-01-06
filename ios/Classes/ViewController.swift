@@ -210,9 +210,32 @@ extension ViewController {
     }
     
     func toggleTorch()-> Bool {
-
-        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInTripleCamera], mediaType: AVMediaType.video, position: .back)
-
+        
+//        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInTripleCamera], mediaType: AVMediaType.video, position: .back)
+        var deviceDiscoverySession: AVCaptureDevice.DiscoverySession!
+        if #available(iOS 13.0, *) {
+            deviceDiscoverySession = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [
+                    .builtInTripleCamera,
+                    .builtInDualWideCamera,
+                    .builtInDualCamera,
+                    .builtInWideAngleCamera,
+                ],
+                mediaType: .video,
+                position: .back
+            )
+        } else {
+            deviceDiscoverySession = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [
+                    .builtInDualCamera,
+                    .builtInWideAngleCamera,
+                ],
+                mediaType: .video,
+                position: .back
+            )
+        }
+        
+        
         guard let device = deviceDiscoverySession.devices.first
         else {return isTorchOn}
         

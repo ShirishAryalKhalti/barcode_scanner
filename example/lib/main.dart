@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:barcode_scanner/barcode_scanner.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -89,51 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Future<void> _showQRDialog(BuildContext context, List<ScannedCode> codes) {
-    return showCupertinoDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (codes.length > 1)
-                        Text(
-                          '${codes.length} codes detected.',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      const SizedBox(height: 16),
-                      for (final code in codes)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(
-                            '${code.format ?? 'UNKNOWN FORMAT'} \n${code.text ?? ''}',
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ElevatedButton(
-                  style: ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(MediaQuery.sizeOf(context).width, 60))),
-                  onPressed: Navigator.of(context).pop,
-                  child: const Text('Close'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

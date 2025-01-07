@@ -24,7 +24,6 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import io.flutter.plugin.common.BinaryMessenger
@@ -60,6 +59,7 @@ class NativeCameraView(
     }
 
     init {
+
         val resolutionValue = creationParams?.get("resolution") as Map<*, *>?
         val resolution = calculateCameraResolution(resolutionValue?.get("value"))
         resolutionSelectorBuilder = ResolutionSelector.Builder().setResolutionStrategy(
@@ -113,27 +113,28 @@ class NativeCameraView(
             tryHarder = true
             tryDownscale = true
             maxNumberOfSymbols = 1
-            binarizer = BarcodeReader.Binarizer.GLOBAL_HISTOGRAM
+            binarizer = BarcodeReader.Binarizer.LOCAL_AVERAGE
         }
         barcodeReader = BarcodeReader(options)
     }
 
     private fun setUpCamera() {
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(
-                activity, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
-        }
+        // Make sure camera permission is granted from flutter side
         cameraExecutor = Executors.newSingleThreadExecutor()
-
-        imageAnalysisBuilder.setAnalyzer(   
+//        if (!allPermissionsGranted()) {
+//            ActivityCompat.requestPermissions(
+//                activity, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+//            )
+//        }
+        startCamera()
+        imageAnalysisBuilder.setAnalyzer(
             cameraExecutor
         ) { imageProxy ->
             processImageProxy(barcodeReader, imageProxy)
         }
     }
+
+
 
     override fun getView(): View {
         return linearLayout
@@ -142,6 +143,7 @@ class NativeCameraView(
     override fun dispose() {
         isTorchOn = false
         camera?.cameraControl?.enableTorch(false)
+        mCameraProvider?.unbindAll()
         cameraExecutor.shutdown()
     }
 
@@ -153,7 +155,6 @@ class NativeCameraView(
     ) {
       imageProxy.let { image ->
             val codes = barcodeScanner.read(image)
-            image.close()
             if (codes.isNotEmpty()) {
                 val scannedCodes : MutableList<ScannedCode> = emptyList<ScannedCode>().toMutableList()
                 for (code in codes) {
@@ -229,26 +230,6 @@ class NativeCameraView(
             else -> defaultResolution
         }
     }
-
-
-//    @kotlin.ExperimentalStdlibApi
-//    private fun getBarcodeFormats(formats: Any?): Set<BarcodeReader.Format> {
-//        if(formats == null || formats !is List<*>) {
-//            return setOf(BarcodeReader.Format.QR_CODE)
-//        }
-//
-//        val barcodeFormats = mutableSetOf<BarcodeReader.Format>()
-//        for (format in BarcodeReader.Format.entries) {
-//            val value = format.name.lowercase().replace("_", "")
-//            if (formats.contains(value)) {
-//                barcodeFormats.add(format)
-//            }
-//        }
-//        if(barcodeFormats.isEmpty()){
-//            return setOf(BarcodeReader.Format.QR_CODE)
-//        }
-//        return barcodeFormats
-//    }
 
     override fun toggleTorch(): Boolean {
         isTorchOn = !isTorchOn

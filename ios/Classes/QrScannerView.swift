@@ -11,24 +11,23 @@ class BarcodeScannerPlatformView: NSObject, FlutterPlatformView {
         binaryMessenger messenger: FlutterBinaryMessenger
     ) {
         let params = args as? [String: Any] ?? [:]
-        let resolution = params["resolution"] as? String ?? "720p"
-        let cameraPosition = params["camera_position"] as? String ?? "back"
-        print("Initial Setup Data: Resolution: \(resolution)")
-        let flutterApi = ScannerFlutterApi(binaryMessenger: messenger)
+//        let resolution = params["resolution"] as? String ?? "720p"
+//        let cameraPosition = params["camera_position"] as? String ?? "back"
+//        print("Initial Setup Data: Resolution: \(resolution)")
+//        let flutterApi = ScannerFlutterApi(binaryMessenger: messenger)
         qrScannerView = ViewController(
             flutterApi: ScannerFlutterApi.init(binaryMessenger: messenger)
         )
-
+        
         scannerController = ScannerControllerImpl(view: qrScannerView)
         ScannerControllerSetup.setUp(binaryMessenger: messenger, api: scannerController)
         qrScannerView.view.frame = frame
         super.init()
     }
-
+    
     func view() -> UIView {
         return qrScannerView.view
     }
-
 }
 
 class ScannerControllerImpl: NSObject, ScannerController {

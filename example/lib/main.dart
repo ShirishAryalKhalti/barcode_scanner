@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:barcode_scanner/barcode_scanner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,11 +54,19 @@ class _HomeScreenState extends State<HomeScreen> {
               unawaited(_controller.stopScanner());
               if (isDialogVisible) return;
               isDialogVisible = true;
-              await _showQRDialog(context, codes);
+              // await _showQRDialog(context, codes);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ShowQRPage(codes: codes),
+                ),
+              );
               isDialogVisible = false;
               unawaited(_controller.startScanner());
             },
-            onError: (error) {},
+            onError: (error) {
+              log('Error: $error');
+            },
           ),
           Padding(
             padding: const EdgeInsets.all(24.0),
@@ -125,6 +134,41 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class ShowQRPage extends StatelessWidget {
+  const ShowQRPage({super.key, required this.codes});
+  final List<ScannedCode> codes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (codes.length > 1)
+                Text(
+                  '${codes.length} codes detected.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              const SizedBox(height: 16),
+              for (final code in codes)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    '${code.format ?? 'UNKNOWN FORMAT'} \n${code.text ?? ''}',
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

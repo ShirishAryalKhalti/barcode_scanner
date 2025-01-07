@@ -49,8 +49,9 @@ class ViewController: UIViewController {
         self.preview.videoGravity = AVLayerVideoGravity.resizeAspectFill
         self.preview.frame = self.view.layer.bounds
         self.view.layer.addSublayer(self.preview)
+        
+        // Handle camera premission on flutter side
         // setup camera session
-        self.requestAccess {
             var discoverySession: AVCaptureDevice.DiscoverySession!
             if #available(iOS 13.0, *) {
                 discoverySession = AVCaptureDevice.DiscoverySession(
@@ -93,20 +94,15 @@ class ViewController: UIViewController {
             DispatchQueue.global(qos: .background).async {
                 self.captureSession.startRunning()
             }
-        }
     }
 
 }
 
-extension ViewController {
-    func requestAccess(_ completion: @escaping () -> Void) {
-        if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) == .notDetermined {
-            AVCaptureDevice.requestAccess(for: .video) { _ in
-                completion()
-            }
-        } else {
-            completion()
-        }
+extension ViewController{
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.preview.frame = self.view.bounds
+        self.view.layer.addSublayer(self.preview)
     }
 }
 
@@ -119,8 +115,6 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-        
-    
 
         if let result = try? reader.read(imageBuffer) {
                 if(!result.isEmpty){
@@ -150,54 +144,8 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 }
 
 extension ViewController {
-    // Check if downscaling image beforing feeding to zxing model improve performance
-    
-    func downscaleImageBuffer(_ imageBuffer: CVImageBuffer) -> CVPixelBuffer? {
-        let newWidth = 640  // Target width (adjust as needed)
-        let newHeight = 480  // Target height (adjust as needed)
-
-        // Create a CIImage from the CVPixelBuffer
-        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-
-        // Create a CIContext for rendering the image
-        let context = CIContext()
-
-        // Calculate the scale transformation
-        let scale = CGAffineTransform(
-            scaleX: CGFloat(newWidth) / CGFloat(CVPixelBufferGetWidth(imageBuffer)),
-            y: CGFloat(newHeight) / CGFloat(CVPixelBufferGetHeight(imageBuffer)))
-
-        // Apply the transformation to the CIImage
-        let scaledCIImage = ciImage.transformed(by: scale)
-
-        // Create a new pixel buffer to hold the scaled image
-        var scaledImageBuffer: CVPixelBuffer?
-        let attributes: [CFString: Any] = [
-            kCVPixelBufferWidthKey: newWidth,
-            kCVPixelBufferHeightKey: newHeight,
-            kCVPixelBufferPixelFormatTypeKey: kCVPixelFormatType_32BGRA,
-        ]
-
-        // Create a pixel buffer for the scaled image
-        let status = CVPixelBufferCreate(
-            kCFAllocatorDefault, newWidth, newHeight, kCVPixelFormatType_32BGRA,
-            attributes as CFDictionary, &scaledImageBuffer)
-
-        guard status == kCVReturnSuccess, let scaledImageBuffer = scaledImageBuffer else {
-            print("Error creating pixel buffer")
-            return nil
-        }
-
-        // Render the scaled image onto the newly created pixel buffer
-        context.render(scaledCIImage, to: scaledImageBuffer)
-
-        return scaledImageBuffer
-    }
-
-}
-
-extension ViewController {
     func startCamera() {
+        
         DispatchQueue.global(qos: .background).async {
             self.captureSession.startRunning()
         }
@@ -262,13 +210,8 @@ extension ViewController {
         return isTorchOn
     }
 
-
-
     func dispose() {
         DispatchQueue.main.async {
-//            if self.device.hasTorch {
-//                self.device.torchMode = .off
-//            }
             // Stop the capture session
             self.captureSession.stopRunning()
             // Remove all inputs and outputs
@@ -317,12 +260,4 @@ extension ViewController{
         }
     }
     
-    func bacodeFormatToInt(val: [String]) -> [Int]{
-        var formats: [Int] = []
-        for format in val{
-//            if(val.contains())
-        }
-        return formats
-      
-    }
 }
